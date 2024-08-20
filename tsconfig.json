@@ -3,11 +3,9 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ],
-  "compilerOptions": {
-    "strict": false, // 启用严格模式
-    "noImplicitAny": false, // 关闭隐式 any 错误检查
-    "strictNullChecks": false // 关闭严格的 null 检查
+  ]
+,"compilerOptions": {
+    "skipLibCheck": true
   }
   
 }

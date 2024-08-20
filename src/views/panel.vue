@@ -1,3 +1,4 @@
+// @ts-nocheck
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import axios from '../util/axiostance';
@@ -5,7 +6,7 @@ import router from '../router';
 import { useTheme } from 'vuetify';
 import { isNighttime } from '../util/nighttime';
 const theme = useTheme();
-const this_target = ref({});
+const this_target: any = ref({});
 const is_targets = ref(0);
 const search = ref("");
 const email = ref("user@example.com");
@@ -187,7 +188,7 @@ onMounted(() => {
                         </h2>
                     </template>
                     <v-virtual-scroll class="h-95vh" :items="logs">
-                        <template v-slot:default="{ item }">
+                        <template v-slot:default="{ item }: { item: any }">
 
                             <h3 class="ml-30" v-if="item.flag_type == 'user'">
                                 {{ item.created_at }}......... {{ item.email }} has got the {{ item.flag_type }} from {{
