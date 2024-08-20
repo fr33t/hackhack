@@ -1,16 +1,23 @@
+use crate::{table::DB, verify};
+use rocket::serde::json::Json;
+use rocket::serde::json::{serde_json::json, Value};
+use rocket_jwt::jwt;
+use rusqlite::params;
+use serde::{Deserialize, Serialize};
 use std::thread;
 
-use crate::{table::DB, verify};
-use rocket::serde::json::{serde_json::json, Value};
-use rocket::{form::Form, FromForm};
-use rusqlite::params;
-#[derive(FromForm)]
+#[jwt("freet", exp = 2592000)] // a month time
+pub struct Token {
+    email: String,
+}
+
+#[derive(Serialize, Deserialize)]
 struct UserEmail<'a> {
     email: &'a str,
 }
 
 #[post("/get_code", data = "<user_email>")]
-pub fn get_code(user_email: Form<UserEmail>) -> Value {
+pub fn get_code(user_email: Json<UserEmail>) -> Value {
     let db = DB.lock().expect("Cannot use database");
 
     // judge the if haven sent the code
@@ -62,13 +69,13 @@ pub fn get_code(user_email: Form<UserEmail>) -> Value {
     return json!({"status":201, "message":"The verifyCode has been sent to your email, pls check it!"});
 }
 
-#[derive(FromForm)]
+#[derive(Serialize, Deserialize)]
 struct UserVerify<'a> {
     email: &'a str,
     code: &'a str,
 }
 #[post("/check_login", data = "<user_verify>")]
-pub fn check_login(user_verify: Form<UserVerify>) -> Value {
+pub fn check_login(user_verify: Json<UserVerify>) -> Value {
     let db = DB.lock().expect("Cannot use database");
 
     // check auth
@@ -87,9 +94,18 @@ pub fn check_login(user_verify: Form<UserVerify>) -> Value {
             .expect("SQL Error")
             .execute(params![user_verify.email])
             .expect("Delete Error");
+        let token = Token {
+            email: user_verify.email.to_string(),
+        };
 
-        return json!({"status":200, "message":"Login Success!"});
+        let token = Token::sign(token);
+        return json!({"status":200, "message":"Login Success!", "token": token});
     } else {
         return json!({"status":401, "message":"Login Failure!"});
     }
+}
+
+#[post("/test_login")]
+pub fn test_login(token: Token) -> String {
+    token.email
 }

@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import axios from '../util/axiostance';
+import router from '../router';
+import { useTheme } from 'vuetify';
+import { isNighttime } from '../util/nighttime';
+const theme = useTheme();
+
 const email = ref("");
 const verifyCode = ref("");
 const error_email = ref(false);
@@ -9,7 +15,10 @@ const loading = ref(false);
 const send_code = () => {
     var reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
     if (reg.test(email.value)) {
-
+        axios.post("/auth/get_code", { email: email.value }).then((res) => {
+            error_text.value = res.data.message;
+            error_email.value = true;
+        });
     } else {
         error_text.value = "Invalid email address!";
         error_email.value = true;
@@ -18,10 +27,26 @@ const send_code = () => {
 const check_code = () => {
     console.log(verifyCode.value);
     loading.value = true;
-    setTimeout(() => {
-        loading.value = false
-    }, 2000)
+    axios.post("/auth/check_login", { email: email.value, code: verifyCode.value }).then((res) => {
+        let data = res.data;
+        let token = data.token;
+        error_text.value = data.message;
+        error_email.value = true;
+        if (data.status = "200") {
+            localStorage.setItem('token', token);
+        }
+        setTimeout(() => {
+            loading.value = false
+            router.push("/panel");
+        }, 2000)
+    });
 }
+onMounted(() => {
+    console.log(isNighttime());
+    if (isNighttime()) {
+        theme.global.name.value = 'dark';
+    }
+})
 </script>
 <template>
     <div>
