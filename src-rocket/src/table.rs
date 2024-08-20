@@ -36,6 +36,7 @@ fn init_table(conn: &Connection) {
     .expect("Error creating table [user]");
 
     // Table [target]
+    // INSERT INTO "main"."target" ("name", "ip", "level", "user", "pwned", "user_flag", "flag", "type", "description", "status") VALUES ('first', '10.10.0.10', '0', '0', '0', 'flag{7f36aa86-9c13-d4fd-cef4-ad6e0b4c8b61}', 'flag{b5b852f4-e068-621c-8526-e799a65d2136}','linux','This is a every simple target.','activate');
     conn.execute(
         "CREATE TABLE IF NOT EXISTS target (
         id INTEGER PRIMARY KEY,
@@ -43,9 +44,12 @@ fn init_table(conn: &Connection) {
         ip TEXT NOT NULL UNIQUE,
         level INTEGER NOT NULL,
         user INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT,
         pwned INTEGER NOT NULL,
         user_flag TEXT NOT NULL,
-        flag TEXT NOT NULL
+        flag TEXT NOT NULL,
+        status TEXT NOT NULL
     )",
         [],
     )

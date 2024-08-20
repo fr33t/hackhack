@@ -27,7 +27,20 @@ fn rocket() -> _ {
         .mount("/", routes![index])
         .mount(
             "/auth",
-            routes![auth::get_code, auth::check_login, auth::test_login],
+            routes![
+                auth::get_code,
+                auth::check_login,
+                auth::test_login,
+                auth::vpn
+            ],
         )
-        .mount("/target", routes![target::all, target::log])
+        .mount(
+            "/target",
+            routes![
+                target::all,
+                target::log,
+                target::get_target,
+                target::submit_flag
+            ],
+        )
 }

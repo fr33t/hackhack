@@ -4,12 +4,11 @@ use rocket::serde::json::{serde_json::json, Value};
 use rocket_jwt::jwt;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
-use std::process::Command;
 use std::thread;
 
 #[jwt("freet", exp = 2592000)] // a month time
 pub struct Token {
-    email: String,
+    pub email: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -41,24 +40,29 @@ pub fn get_code(user_email: Json<UserEmail>) -> Value {
         .query_row(params![user_email.email], |row| row.get(0))
         .expect("Query Error");
     if !user_exists {
-        db.prepare("INSERT INTO user (email) VALUES (?1);")
+        db.prepare("INSERT INTO user (email, score) VALUES (?1, 0);")
             .expect("SQL Error")
             .execute(params![user_email.email])
             .expect("Insert Error");
-        // new openvpn profile
-        // std::env::current_dir().unwrap()
-        let mut ovpn = std::env::current_dir().unwrap();
-        ovpn.push("openvpn-install");
-        ovpn.push("openvpn-install.sh");
-        let cmd = ovpn.to_str().unwrap();
-
-        let child = Command::new(cmd)
-            .arg("--addclient")
-            .arg(user_email.email)
-            .output()
-            .unwrap();
-        let ls_list = String::from_utf8(child.stdout).unwrap();
-        println!("{}", ls_list);
+        #[cfg(target_os = "linux")]
+        {
+            use std::process::Command;
+            // new openvpn profile
+            // std::env::current_dir().unwrap()
+            let mut ovpn = std::env::current_dir().unwrap();
+            ovpn.push("openvpn-install");
+            ovpn.push("openvpn-install.sh");
+            let cmd = ovpn.to_str().unwrap();
+            // add x
+            Command::new("chmod").arg("+x").arg(cmd).output().unwrap();
+            let child = Command::new(cmd)
+                .arg("--addclient")
+                .arg(user_email.email)
+                .output()
+                .unwrap();
+            let ls_list = String::from_utf8(child.stdout).unwrap();
+            println!("{}", ls_list);
+        }
     }
 
     // generate and send verify code to user email and check db
@@ -121,6 +125,22 @@ pub fn check_login(user_verify: Json<UserVerify>) -> Value {
 }
 
 #[post("/test_login")]
-pub fn test_login(token: Token) -> String {
-    token.email
+pub fn test_login(token: Token) -> Value {
+    // query score from user
+    let db = DB.lock().expect("Cannot use database");
+    let mut user_score_stmt = db
+        .prepare("SELECT score FROM user WHERE email =?;")
+        .expect("SQL Error");
+    let user_score: i32 = user_score_stmt
+        .query_row(params![token.email], |row| row.get(0))
+        .expect("Query Error");
+    json!({"email":token.email,"score":user_score})
+}
+use rocket::fs::NamedFile;
+use std::path::Path;
+#[get("/vpn")]
+pub async fn vpn(token: Token) -> Option<NamedFile> {
+    let m = token.email.replace(".", "_").replace("@", "_") + ".ovpn";
+    let file_path = Path::new("/opt/openvpn").join(m);
+    NamedFile::open(file_path).await.ok()
 }
