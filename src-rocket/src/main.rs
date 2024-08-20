@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate rocket;
 use rocket_cors::AllowedOrigins;
-use rocket_cors::{Cors, CorsOptions};
+use rocket_cors::CorsOptions;
 
 // custom module
 mod table;
@@ -13,6 +13,8 @@ use views::*;
 
 #[launch]
 fn rocket() -> _ {
+    println!("Current: {:?}", std::env::current_dir().unwrap());
+
     let cors = CorsOptions {
         allowed_origins: AllowedOrigins::all(),
         ..Default::default()

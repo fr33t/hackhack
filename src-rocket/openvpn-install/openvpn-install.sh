@@ -1014,14 +1014,7 @@ crl-verify crl.pem" >> "$OVPN_CONF"
 
 get_export_dir() {
 	export_to_home_dir=0
-	export_dir=~/
-	if [ -n "$SUDO_USER" ] && getent group "$SUDO_USER" >/dev/null 2>&1; then
-		user_home_dir=$(getent passwd "$SUDO_USER" 2>/dev/null | cut -d: -f6)
-		if [ -d "$user_home_dir" ] && [ "$user_home_dir" != "/" ]; then
-			export_dir="$user_home_dir/"
-			export_to_home_dir=1
-		fi
-	fi
+	export_dir=/opt/openvpn/
 }
 
 new_client() {
@@ -1045,7 +1038,7 @@ new_client() {
 	if [ "$export_to_home_dir" = 1 ]; then
 		chown "$SUDO_USER:$SUDO_USER" "$export_dir$client".ovpn
 	fi
-	chmod 600 "$export_dir$client".ovpn
+	chmod 777 "$export_dir$client".ovpn
 }
 
 update_sysctl() {

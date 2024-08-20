@@ -40,6 +40,7 @@ fn init_table(conn: &Connection) {
         "CREATE TABLE IF NOT EXISTS target (
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL UNIQUE,
+        ip TEXT NOT NULL UNIQUE,
         level INTEGER NOT NULL,
         user INTEGER NOT NULL,
         pwned INTEGER NOT NULL,

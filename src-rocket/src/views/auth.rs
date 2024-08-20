@@ -4,6 +4,7 @@ use rocket::serde::json::{serde_json::json, Value};
 use rocket_jwt::jwt;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
+use std::process::Command;
 use std::thread;
 
 #[jwt("freet", exp = 2592000)] // a month time
@@ -44,6 +45,20 @@ pub fn get_code(user_email: Json<UserEmail>) -> Value {
             .expect("SQL Error")
             .execute(params![user_email.email])
             .expect("Insert Error");
+        // new openvpn profile
+        // std::env::current_dir().unwrap()
+        let mut ovpn = std::env::current_dir().unwrap();
+        ovpn.push("openvpn-install");
+        ovpn.push("openvpn-install.sh");
+        let cmd = ovpn.to_str().unwrap();
+
+        let child = Command::new(cmd)
+            .arg("--addclient")
+            .arg(user_email.email)
+            .output()
+            .unwrap();
+        let ls_list = String::from_utf8(child.stdout).unwrap();
+        println!("{}", ls_list);
     }
 
     // generate and send verify code to user email and check db
