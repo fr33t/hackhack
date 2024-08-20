@@ -1,0 +1,1 @@
+INSERT INTO "main"."target" ("id", "name", "ip", "level", "user", "type", "description", "pwned", "user_flag", "flag", "status") VALUES ('1', 'first', '10.10.0.10', '0', '0', 'linux', 'This is a every simple target.', '0', 'flag{7f36aa86-9c13-d4fd-cef4-ad6e0b4c8b61}', 'flag{b5b852f4-e068-621c-8526-e799a65d2136}', 'activate');

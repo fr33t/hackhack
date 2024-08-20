@@ -18,7 +18,7 @@ struct UserEmail<'a> {
 
 #[post("/get_code", data = "<user_email>")]
 pub fn get_code(user_email: Json<UserEmail>) -> Value {
-    let db = DB.lock().expect("Cannot use database");
+    let db = DB.get().expect("Cannot use database");
 
     // judge the if haven sent the code
     let mut sent_exist_stmt = db
@@ -78,7 +78,7 @@ pub fn get_code(user_email: Json<UserEmail>) -> Value {
     let delete_email = user_email.email.to_string();
     thread::spawn(move || {
         thread::sleep(std::time::Duration::from_secs(60)); // 1 minutes
-        let db = DB.lock().expect("Cannot use database");
+        let db = DB.get().expect("Cannot use database");
         db.prepare("DELETE FROM verify WHERE email =?;")
             .expect("SQL Error")
             .execute(params![delete_email])
@@ -95,7 +95,7 @@ struct UserVerify<'a> {
 }
 #[post("/check_login", data = "<user_verify>")]
 pub fn check_login(user_verify: Json<UserVerify>) -> Value {
-    let db = DB.lock().expect("Cannot use database");
+    let db = DB.get().expect("Cannot use database");
 
     // check auth
     let mut code_exist_stmt = db
@@ -127,7 +127,7 @@ pub fn check_login(user_verify: Json<UserVerify>) -> Value {
 #[post("/test_login")]
 pub fn test_login(token: Token) -> Value {
     // query score from user
-    let db = DB.lock().expect("Cannot use database");
+    let db = DB.get().expect("Cannot use database");
     let mut user_score_stmt = db
         .prepare("SELECT score FROM user WHERE email =?;")
         .expect("SQL Error");

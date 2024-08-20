@@ -1,14 +1,16 @@
 use once_cell::sync::Lazy;
+use r2d2::Pool;
+use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::Connection;
-use std::sync::{Arc, Mutex};
 
-pub static DB: Lazy<Arc<Mutex<Connection>>> = Lazy::new(|| Arc::new(Mutex::new(init_db())));
-
-fn init_db() -> Connection {
-    let conn = Connection::open("hackhack.db").expect("Failed to open database!");
+pub static DB: Lazy<Pool<SqliteConnectionManager>> = Lazy::new(|| init_db());
+fn init_db() -> Pool<SqliteConnectionManager> {
+    let manager = SqliteConnectionManager::file("hackhack.db");
+    let pool = r2d2::Pool::new(manager).unwrap();
+    let conn = pool.get().unwrap();
     // init table
     init_table(&conn);
-    conn
+    pool
 }
 
 fn init_table(conn: &Connection) {

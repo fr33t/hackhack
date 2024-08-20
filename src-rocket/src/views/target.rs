@@ -19,7 +19,7 @@ struct Target {
 
 #[get("/all")]
 pub fn all() -> Json<Vec<Target>> {
-    let db = DB.lock().expect("Cannot use database");
+    let db = DB.get().expect("Cannot use database");
     let mut query_target_stmt = db
         .prepare("SELECT name, level, user, pwned, type FROM target WHERE status='activate';")
         .expect("SQL error");
@@ -54,7 +54,7 @@ struct Log {
 }
 #[get("/log")]
 pub fn log() -> Json<Vec<Log>> {
-    let db = DB.lock().expect("Cannot use database");
+    let db = DB.get().expect("Cannot use database");
     let mut query_target_stmt = db
         .prepare("SELECT email,flag_type,target_name,created_at FROM log;")
         .expect("SQL error");
@@ -77,7 +77,7 @@ pub fn log() -> Json<Vec<Log>> {
 
 #[get("/get/<target_name>")]
 pub fn get_target(target_name: &str) -> Json<Target> {
-    let db = DB.lock().expect("Cannot use database");
+    let db = DB.get().expect("Cannot use database");
     let mut query_target_stmt = db
         .prepare(
             "SELECT name, level, user, pwned, type, description, ip FROM target WHERE name=?1;",
@@ -110,7 +110,7 @@ struct FlagLog {
 #[post("/submit", data = "<flag_log>")]
 pub fn submit_flag(token: Token, flag_log: Json<FlagLog>) -> String {
     // token.email, flag, flag_type, target_name
-    let db = DB.lock().expect("Cannot use the database");
+    let db = DB.get().expect("Cannot use the database");
     // check the log if it exists
     let mut log_query_stmt = db
         .prepare(

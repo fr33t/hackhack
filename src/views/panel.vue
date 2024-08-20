@@ -172,7 +172,7 @@ onMounted(() => {
                         <template v-slot:item.pwned="{ value }">
                             <h1 class="text-red  no-underline ">{{
                                 value
-                                }}
+                            }}
 
                             </h1>
                         </template>
@@ -249,9 +249,6 @@ onMounted(() => {
         </v-layout>
     </v-card>
     <div class="text-center ma-2">
-        <v-btn @click="snackbar = true">
-            Open Snackbar
-        </v-btn>
         <v-snackbar v-model="snackbar">
             {{ message }}
 

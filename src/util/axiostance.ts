@@ -1,7 +1,7 @@
 import client from "axios";
 
 const axios = client.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: "http://101.43.141.31:8000",
   timeout: 2000,
   headers: {
     "Content-Type": "application/json",
