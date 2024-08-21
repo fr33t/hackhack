@@ -45,6 +45,10 @@ onMounted(() => {
     if (isNighttime()) {
         theme.global.name.value = 'dark';
     }
+    const token = localStorage.getItem("token");
+    if (token) {
+        router.push("/panel");
+    }
 })
 </script>
 <template>
