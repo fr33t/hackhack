@@ -98,6 +98,7 @@ onMounted(() => {
         } else {
             router.push("/");
         }
+
     })
     axios.get("/target/all").then((res) => {
         items.value = res.data;

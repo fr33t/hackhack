@@ -25,24 +25,23 @@ const send_code = () => {
     }
 };
 const check_code = () => {
-    console.log(verifyCode.value);
     loading.value = true;
     axios.post("/auth/check_login", { email: email.value, code: verifyCode.value }).then((res) => {
         let data = res.data;
         let token = data.token;
         error_text.value = data.message;
         error_email.value = true;
-        if (data.status = "200") {
-            localStorage.setItem('token', token);
-        }
+
         setTimeout(() => {
             loading.value = false
-            router.push("/panel");
+            if (data.status == 200) {
+                localStorage.setItem('token', token);
+                router.push("/panel");
+            }
         }, 2000)
     });
 }
 onMounted(() => {
-    console.log(isNighttime());
     if (isNighttime()) {
         theme.global.name.value = 'dark';
     }
